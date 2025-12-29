@@ -10,7 +10,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
+app.get("/", (req, res) => {
+  res.send("SIVAAH Backend is running 🚀");
+});
 app.use("/api/products", require("./routes/products"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/upload", require("./routes/upload"));
