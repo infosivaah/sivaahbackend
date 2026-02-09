@@ -18,6 +18,7 @@ app.use("/api/admin", require("./routes/admin"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/collections", require("./routes/collections"));
+app.use("/api/rate", require("./routes/rates"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

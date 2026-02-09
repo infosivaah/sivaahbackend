@@ -34,6 +34,15 @@ const ProductSchema = new mongoose.Schema({
   },
 
   stock: Number,
+grams: {
+  type: Number,
+  required: true
+},
+
+labourPerGram: {
+  type: Number,
+  required: true
+},
 
   isActive: {
     type: Boolean,
