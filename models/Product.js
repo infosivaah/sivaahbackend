@@ -16,9 +16,23 @@ const ProductSchema = new mongoose.Schema({
   subtitle: String,
 
   emotion: {
-    type: String,
-    enum: ["Protection", "Strength", "Abundance"]
-  },
+  type: String,
+  enum: [
+    "Protection",
+    "Strength",
+    "Abundance",
+    "Balance",
+    "Healing",
+    "Love",
+    "Peace",
+    "Focus",
+    "Grounding",
+    "Good Luck",
+    "Care"
+  ],
+  default: "Protection"
+},
+
 
   description: String,
   benefits: [String],
