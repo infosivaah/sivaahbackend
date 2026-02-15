@@ -17,20 +17,6 @@ const ProductSchema = new mongoose.Schema({
 
   emotion: {
   type: String,
-  enum: [
-    "Protection",
-    "Strength",
-    "Abundance",
-    "Balance",
-    "Healing",
-    "Love",
-    "Peace",
-    "Focus",
-    "Grounding",
-    "Good Luck",
-    "Care"
-  ],
-  default: "Protection"
 },
 
 
