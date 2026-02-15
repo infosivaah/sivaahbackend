@@ -32,7 +32,11 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     default: "925 Silver"
   },
-
+seo: {
+  title: { type: String },
+  description: { type: String },
+  keywords: { type: String }
+},
   stock: Number,
 grams: {
   type: Number,
