@@ -19,6 +19,9 @@ app.use("/api/upload", require("./routes/upload"));
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/collections", require("./routes/collections"));
 app.use("/api/rate", require("./routes/rates"));
+app.use("/api/payment", require("./routes/payment"));
+app.use("/api/orders", require("./routes/orders"));
+app.use("/api/reviews", require("./routes/reviews"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
