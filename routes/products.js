@@ -11,17 +11,21 @@ router.get("/", async (req, res) => {
 });
 /* HOME PRODUCTS */
 
+/* HOME PRODUCTS */
+
 router.get("/featured", async (req, res) => {
 
   try {
 
-    const categories = [
+    /* UNIQUE CATEGORIES */
 
-      "Ring",
-      "Pendants",
-      "Studs",
-      "Bracelets"
-    ];
+    const categories =
+      await Product.distinct(
+        "category",
+        {
+          isActive: true
+        }
+      );
 
     let homeProducts = [];
 
@@ -46,6 +50,8 @@ router.get("/featured", async (req, res) => {
 
   } catch (err) {
 
+    console.log(err);
+
     res.status(500).json({
 
       message:
@@ -53,6 +59,10 @@ router.get("/featured", async (req, res) => {
     });
   }
 });
+/* PAGINATED + FILTERED PRODUCTS */
+
+/* PAGINATED + FILTERED PRODUCTS */
+
 router.get("/paginated", async (req, res) => {
 
   try {
@@ -66,21 +76,107 @@ router.get("/paginated", async (req, res) => {
     const skip =
       (page - 1) * limit;
 
+    const {
+      category,
+      search,
+      maxPrice,
+      sort
+    } = req.query;
+
+    /* FILTER */
+
+    const filter = {
+      isActive: true
+    };
+
+    /* CATEGORY */
+
+    if (category) {
+
+      filter.category = {
+        $regex:
+          new RegExp(
+            `^${category}$`,
+            "i"
+          )
+      };
+    }
+
+    /* SEARCH */
+
+    if (search) {
+
+      filter.$or = [
+
+        {
+          name: {
+            $regex: search,
+            $options: "i"
+          }
+        },
+
+        {
+          category: {
+            $regex: search,
+            $options: "i"
+          }
+        }
+      ];
+    }
+
+    /* PRICE */
+
+    if (maxPrice) {
+
+      filter.price = {
+        $lte: Number(maxPrice)
+      };
+    }
+
+    /* SORT */
+
+    let sortOption = {
+      createdAt: -1
+    };
+
+    if (sort === "price-asc") {
+
+      sortOption = {
+        price: 1
+      };
+    }
+
+    if (sort === "price-desc") {
+
+      sortOption = {
+        price: -1
+      };
+    }
+
+    if (sort === "latest") {
+
+      sortOption = {
+        createdAt: -1
+      };
+    }
+
+    /* TOTAL */
+
     const total =
-      await Product.countDocuments({
-        isActive: true
-      });
+      await Product.countDocuments(
+        filter
+      );
+
+    /* PRODUCTS */
 
     const products =
-      await Product.find({
-        isActive: true
-      })
+      await Product.find(filter)
 
-      .sort({ createdAt: -1 })
+        .sort(sortOption)
 
-      .skip(skip)
+        .skip(skip)
 
-      .limit(limit);
+        .limit(limit);
 
     res.json({
 
@@ -92,6 +188,8 @@ router.get("/paginated", async (req, res) => {
     });
 
   } catch (err) {
+
+    console.log(err);
 
     res.status(500).json({
 
