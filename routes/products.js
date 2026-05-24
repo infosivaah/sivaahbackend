@@ -13,38 +13,55 @@ router.get("/", async (req, res) => {
 
 /* HOME PRODUCTS */
 
+/* HOME BESTSELLERS */
+
 router.get("/featured", async (req, res) => {
 
   try {
 
-    /* UNIQUE CATEGORIES */
+    /* 3 RINGS */
 
-    const categories =
-      await Product.distinct(
-        "category",
-        {
-          isActive: true
+    const rings =
+      await Product.find({
+        isActive: true,
+        category: {
+          $regex: /ring/i
         }
-      );
+      })
+      .sort({ createdAt: -1 })
+      .limit(3);
 
-    let homeProducts = [];
+    /* 3 STUDS */
 
-    for (const category of categories) {
+    const studs =
+      await Product.find({
+        isActive: true,
+        category: {
+          $regex: /stud/i
+        }
+      })
+      .sort({ createdAt: -1 })
+      .limit(3);
 
-      const products =
-        await Product.find({
+    /* 2 PENDANTS */
 
-          category,
+    const pendants =
+      await Product.find({
+        isActive: true,
+        category: {
+          $regex: /pendent|pendant/i
+        }
+      })
+      .sort({ createdAt: -1 })
+      .limit(2);
 
-          isActive: true
-        })
+    /* FINAL ARRAY */
 
-        .sort({ createdAt: -1 })
-
-        .limit(4);
-
-      homeProducts.push(...products);
-    }
+    const homeProducts = [
+      ...rings,
+      ...studs,
+      ...pendants
+    ];
 
     res.json(homeProducts);
 
@@ -53,13 +70,11 @@ router.get("/featured", async (req, res) => {
     console.log(err);
 
     res.status(500).json({
-
       message:
-        "Failed to fetch home products"
+        "Failed to fetch featured products"
     });
   }
 });
-/* PAGINATED + FILTERED PRODUCTS */
 
 /* PAGINATED + FILTERED PRODUCTS */
 
