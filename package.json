@@ -23,6 +23,7 @@
     "nodemailer": "^8.0.7",
     "nodemon": "^3.1.11",
     "razorpay": "^2.9.6",
+    "resend": "^6.18.0",
     "streamifier": "^0.1.1"
   }
 }

@@ -4,75 +4,86 @@ const axios = require("axios");
 const router = express.Router();
 
 const Order = require("../models/Order");
-const nodemailer =
-    require("nodemailer");
-const transporter = nodemailer.createTransport({
-  host: "74.125.24.109", // One of Gmail's IPv4 SMTP addresses
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// const nodemailer =
+//     require("nodemailer");
+const { Resend } = require("resend");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+// const transporter = nodemailer.createTransport({
+//   host: "74.125.24.109", // One of Gmail's IPv4 SMTP addresses
+//   port: 465,
+//   secure: true,
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
+// await resend.emails.send({
+//   from: "Sivaah <onboarding@resend.dev>",
+//   to: customer.email,
+//   subject: `Order Confirmed - ${orderId}`,
+//   html: `
+//       YOUR EXISTING HTML HERE
+//   `
+// });
 /* =====================================
    SHIPROCKET LOGIN
 ===================================== */
 
 const getShiprocketToken =
-  async () => {
+    async () => {
 
-    try {
+        try {
 
-      const response =
-        await axios.post(
-          "https://apiv2.shiprocket.in/v1/external/auth/login",
-          {
-            email:
-              process.env
-                .SHIPROCKET_EMAIL,
+            const response =
+                await axios.post(
+                    "https://apiv2.shiprocket.in/v1/external/auth/login",
+                    {
+                        email:
+                            process.env
+                                .SHIPROCKET_EMAIL,
 
-            password:
-              process.env
-                .SHIPROCKET_PASSWORD
-          }
-        );
+                        password:
+                            process.env
+                                .SHIPROCKET_PASSWORD
+                    }
+                );
 
-      console.log(
-        "SHIPROCKET LOGIN RESPONSE:"
-      );
+            console.log(
+                "SHIPROCKET LOGIN RESPONSE:"
+            );
 
-      console.log(
-        response.data
-      );
+            console.log(
+                response.data
+            );
 
-      return response.data.token;
+            return response.data.token;
 
-    } catch (err) {
+        } catch (err) {
 
-      console.log(
-        "SHIPROCKET LOGIN ERROR:"
-      );
+            console.log(
+                "SHIPROCKET LOGIN ERROR:"
+            );
 
-      console.log(
-        err.response?.data ||
-        err.message
-      );
+            console.log(
+                err.response?.data ||
+                err.message
+            );
 
-      return null;
-    }
-  };
+            return null;
+        }
+    };
 
 /* =====================================
    CREATE ORDER
 ===================================== */
-transporter.verify((err, success) => {
-  if (err) {
-    console.error("SMTP VERIFY ERROR:", err);
-  } else {
-    console.log("SMTP READY:", success);
-  }
-});
+// transporter.verify((err, success) => {
+//   if (err) {
+//     console.error("SMTP VERIFY ERROR:", err);
+//   } else {
+//     console.log("SMTP READY:", success);
+//   }
+// });
 router.post("/", async (req, res) => {
 
     try {
@@ -122,10 +133,10 @@ router.post("/", async (req, res) => {
 
             const token =
                 await getShiprocketToken();
-console.log(
-  "TOKEN:",
-  token
-);
+            console.log(
+                "TOKEN:",
+                token
+            );
             const orderItems =
                 products.map((p) => ({
                     name: p.name,
@@ -246,18 +257,11 @@ console.log(
     `
                 ).join("");
             if (customer.email) {
-console.log("Sending customer email to:", customer.email);
-                await transporter.sendMail({
-
-                    from:
-                        process.env.EMAIL_USER,
-
-                    to:
-                        customer.email,
-
-                    subject:
-                        `Order Confirmed - ${orderId}`,
-
+                console.log("Sending customer email to:", customer.email);
+                const customerMail = await resend.emails.send({
+                    from: "Sivaah <onboarding@resend.dev>",
+                    to: customer.email,
+                    subject: `Order Confirmed - ${orderId}`,
                     html: `
 
         <div style="font-family:sans-serif">
@@ -318,23 +322,89 @@ ${productsHtml}
         </div>
       `
                 });
+
+                console.log("Customer Mail:", customerMail);
+
+                //                 await transporter.sendMail({
+
+                //                     from:
+                //                         process.env.EMAIL_USER,
+
+                //                     to:
+                //                         customer.email,
+
+                //                     subject:
+                //                         `Order Confirmed - ${orderId}`,
+
+                //                     html: `
+
+                //         <div style="font-family:sans-serif">
+
+                //           <h2>
+                //             Thank you for shopping with SIVAAH ✨
+                //           </h2>
+
+                //           <p>
+                //             Your order has been placed successfully.
+                //           </p>
+
+                //           <p>
+                //             <b>Order ID:</b>
+                //             ${orderId}
+                //           </p>
+
+                //           <p>
+                //             <b>Payment:</b>
+                //             ${paymentMethod}
+                //           </p>
+
+                //           <p>
+                //             <b>Total:</b>
+                //             ₹${totalAmount}
+                //           </p>
+                //           <h3>
+                //   Ordered Products
+                // </h3>
+
+                // <table
+                //   border="1"
+                //   cellpadding="8"
+                //   cellspacing="0"
+                //   style="border-collapse:collapse"
+                // >
+
+                // <tr>
+                //   <th>Product</th>
+                //   <th>Qty</th>
+                //   <th>Price</th>
+                // </tr>
+
+                // ${productsHtml}
+
+                // </table>
+
+                //           <p>
+                //             We’ll notify you once your order is shipped.
+                //           </p>
+
+                //           <br/>
+
+                //           <p>
+                //             Team SIVAAH
+                //           </p>
+
+                //         </div>
+                //       `
+                //                 });
             }
 
             /* ADMIN EMAIL */
-console.log("Sending admin email...");
-            await transporter.sendMail({
-
-                from:
-                    process.env.EMAIL_USER,
-
-                to:
-                    "infosivaah@gmail.com",
-
-                subject:
-                    `New Order Received - ${orderId}`,
-
-
-                html: `
+            console.log("Sending admin email...");
+            const adminMail = await resend.emails.send({
+                from: "Sivaah <onboarding@resend.dev>",
+                to: "infosivaah@gmail.com",
+                subject: `New Order Received - ${orderId}`,
+                     html: `
 
       <div style="font-family:sans-serif">
 
@@ -398,6 +468,11 @@ ${productsHtml}
       </div>
     `
             });
+
+            console.log("Admin Mail:", adminMail);
+        
+
+
 
         } catch (mailErr) {
 
