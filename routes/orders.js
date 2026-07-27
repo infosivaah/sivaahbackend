@@ -4,28 +4,11 @@ const axios = require("axios");
 const router = express.Router();
 
 const Order = require("../models/Order");
-// const nodemailer =
-//     require("nodemailer");
+
 const { Resend } = require("resend");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-// const transporter = nodemailer.createTransport({
-//   host: "74.125.24.109", // One of Gmail's IPv4 SMTP addresses
-//   port: 465,
-//   secure: true,
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS,
-//   },
-// });
-// await resend.emails.send({
-//   from: "Sivaah <onboarding@resend.dev>",
-//   to: customer.email,
-//   subject: `Order Confirmed - ${orderId}`,
-//   html: `
-//       YOUR EXISTING HTML HERE
-//   `
-// });
+
 /* =====================================
    SHIPROCKET LOGIN
 ===================================== */
@@ -77,13 +60,7 @@ const getShiprocketToken =
 /* =====================================
    CREATE ORDER
 ===================================== */
-// transporter.verify((err, success) => {
-//   if (err) {
-//     console.error("SMTP VERIFY ERROR:", err);
-//   } else {
-//     console.log("SMTP READY:", success);
-//   }
-// });
+
 router.post("/", async (req, res) => {
 
     try {
@@ -259,7 +236,8 @@ router.post("/", async (req, res) => {
             if (customer.email) {
                 console.log("Sending customer email to:", customer.email);
                 const customerMail = await resend.emails.send({
-                    from: "Sivaah <onboarding@resend.dev>",
+                    from: "Sivaah <orders@sivaah.in>",
+                    replyTo: "infosivaah@gmail.com",
                     to: customer.email,
                     subject: `Order Confirmed - ${orderId}`,
                     html: `
@@ -324,84 +302,14 @@ ${productsHtml}
                 });
 
                 console.log("Customer Mail:", customerMail);
-
-                //                 await transporter.sendMail({
-
-                //                     from:
-                //                         process.env.EMAIL_USER,
-
-                //                     to:
-                //                         customer.email,
-
-                //                     subject:
-                //                         `Order Confirmed - ${orderId}`,
-
-                //                     html: `
-
-                //         <div style="font-family:sans-serif">
-
-                //           <h2>
-                //             Thank you for shopping with SIVAAH ✨
-                //           </h2>
-
-                //           <p>
-                //             Your order has been placed successfully.
-                //           </p>
-
-                //           <p>
-                //             <b>Order ID:</b>
-                //             ${orderId}
-                //           </p>
-
-                //           <p>
-                //             <b>Payment:</b>
-                //             ${paymentMethod}
-                //           </p>
-
-                //           <p>
-                //             <b>Total:</b>
-                //             ₹${totalAmount}
-                //           </p>
-                //           <h3>
-                //   Ordered Products
-                // </h3>
-
-                // <table
-                //   border="1"
-                //   cellpadding="8"
-                //   cellspacing="0"
-                //   style="border-collapse:collapse"
-                // >
-
-                // <tr>
-                //   <th>Product</th>
-                //   <th>Qty</th>
-                //   <th>Price</th>
-                // </tr>
-
-                // ${productsHtml}
-
-                // </table>
-
-                //           <p>
-                //             We’ll notify you once your order is shipped.
-                //           </p>
-
-                //           <br/>
-
-                //           <p>
-                //             Team SIVAAH
-                //           </p>
-
-                //         </div>
-                //       `
-                //                 });
+          
             }
 
             /* ADMIN EMAIL */
             console.log("Sending admin email...");
             const adminMail = await resend.emails.send({
-                from: "Sivaah <onboarding@resend.dev>",
+                from: "Sivaah <orders@sivaah.in>",
+                replyTo: "infosivaah@gmail.com",
                 to: "infosivaah@gmail.com",
                 subject: `New Order Received - ${orderId}`,
                      html: `
