@@ -8,13 +8,16 @@ const nodemailer =
     require("nodemailer");
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  family: 4, // Force IPv4
+  port: 465,
+  secure: true,
+  family: 4,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 });
 /* =====================================
    SHIPROCKET LOGIN
@@ -67,7 +70,13 @@ const getShiprocketToken =
 /* =====================================
    CREATE ORDER
 ===================================== */
-
+transporter.verify((err, success) => {
+  if (err) {
+    console.error("SMTP VERIFY ERROR:", err);
+  } else {
+    console.log("SMTP READY:", success);
+  }
+});
 router.post("/", async (req, res) => {
 
     try {
@@ -241,7 +250,7 @@ console.log(
     `
                 ).join("");
             if (customer.email) {
-
+console.log("Sending customer email to:", customer.email);
                 await transporter.sendMail({
 
                     from:
@@ -316,7 +325,7 @@ ${productsHtml}
             }
 
             /* ADMIN EMAIL */
-
+console.log("Sending admin email...");
             await transporter.sendMail({
 
                 from:
@@ -398,7 +407,7 @@ ${productsHtml}
 
             console.log(
                 "MAIL ERROR:",
-                mailErr.message
+                mailErr
             );
         }
         /* SUCCESS */
